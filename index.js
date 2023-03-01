@@ -2,13 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 var mongoose = require('mongoose');
-const {ObjectId} = require("mongodb");
 var Schema   = mongoose.Schema;
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const session = require('express-session');
 
-
+authenticated = false;
 
 const url = 'mongodb://localhost:27017';
 const dbName = 'tic-tac-toe';
@@ -29,39 +25,6 @@ const userSchema = new Schema({
 
 var User = mongoose.model('User', userSchema);
 
-
-passport.use(new LocalStrategy(
-    async function(username, password, done) {
-        try {
-            const user = await User.findOne({ username: username });
-            if (!user) return done(null, false);
-            if (password !== user.password) return done(null, false);
-            return done(null, user);
-        } catch (err) {
-            return done(err);
-        }
-    }
-));
-app.use(session({
-    secret: 'your secret key',
-    resave: false,
-    saveUninitialized: false
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser(function(user, done) {
-    done(null, user._id);
-    // if you use Model.id as your idAttribute maybe you'd want
-    // done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-    var user = User.findById(id);
-    done(null, user);
-});
-
 // REST API to save game data to MongoDB
 app.post('/api/save/:player', express.json(), function(req, res) {
     const player = req.params.player;
@@ -70,6 +33,7 @@ app.post('/api/save/:player', express.json(), function(req, res) {
         player: player
     }).save();
 });
+
 // REST API to save game data to MongoDB
 app.get('/api/games', express.json(), function(req, res) {
     Board.find()
@@ -129,17 +93,27 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 app.get('/logout', function(req, res, next) {
-    req.logout(function(err) {
-        if (err) { return next(err); }
-        res.redirect('/');
-    });
+    authenticated = false;
+    res.redirect('/');
 });
-app.post('/login',
-    passport.authenticate('local', { successRedirect: '/admin', failureRedirect: '/login' })
-);
+// app.post('/login',
+//     passport.authenticate('local', { successRedirect: '/admin', failureRedirect: '/login' })
+// );
+app.post('/login',async function(req, res, next) {
+    var username =  req.body.username;
+    var password =  req.body.password;
+    users = await User.find({ username: username, password: password  });
+    if (users.length > 0) {
+        authenticated = true;
+        return res.redirect("/admin")
+    }
+    else {
+        return res.redirect("/login")
+    }
+});
 
 function isAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
+    if (authenticated) {
         return next();
     }
     res.redirect('/login');
