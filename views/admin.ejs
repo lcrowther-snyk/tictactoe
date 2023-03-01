@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Collections</title>
+</head>
+<body>
+<h1>Admin</h1>
+<form method="post" action="/delete">
+    <ul>
+        <% var index=1%>
+        <% boards.forEach(board => { %>
+            <li>
+                (<%=index++%>) <%= board.player %> Won!
+                 <input type="checkbox" name="ids[]" value="<%= board._id %>">
+            </li>
+        <% }) %>
+    </ul>
+    <button type="submit">Delete Selected</button>
+</form>
+</body>
+</html>
