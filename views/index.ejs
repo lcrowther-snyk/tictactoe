@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+<body>
+    <script>var loadboard = "<%= board %>";</script>
+    <div><h1>Tic Tac Toe!</h1><a href="/">New Game</a></div>
+    <div id="board"></div>
+    <div id="message" class="message"><%= player %></div>
+    <br/><br/>
+    <div><h3>Previous Games</h3></div>
+    <div id="boards" class="message"></div>
+    <script src="/app.js"></script>
+    <script>
+        createBoard();
+        showPrevious();
+    </script>
+</body>
+</html>

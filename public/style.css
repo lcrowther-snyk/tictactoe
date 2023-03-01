@@ -1,0 +1,27 @@
+#board {
+    display: flex;
+    flex-wrap: wrap;
+    width: 300px;
+}
+
+.cell {
+    width: 98px;
+    height: 98px;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cell:hover {
+    background-color: lightgray;
+}
+
+.message {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 20px;
+}
