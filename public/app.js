@@ -54,6 +54,7 @@ function play(cell, index) {
         } else if (moves === cells.length) {
             gameOver = true;
             message.textContent = "It's a tie!";
+            saveGameData('draw');
         } else {
             currentPlayer = currentPlayer === "X" ? "O" : "X";
             message.textContent = `${currentPlayer}'s turn`;
@@ -77,7 +78,7 @@ function checkWin(player) {
         const [a, b, c] = lines[i];
         if (cells[a] === player && cells[b] === player && cells[c] === player) {
             // Save game data to MongoDB
-            saveGameData();
+            saveGameData(currentPlayer);
             return true;
         }
     }
@@ -85,7 +86,7 @@ function checkWin(player) {
     return false;
 }
 // Save game data to MongoDB
-function saveGameData() {
+function saveGameData(type) {
     const options = {
         method: 'POST',
         headers: {
@@ -93,7 +94,8 @@ function saveGameData() {
         },
         body: JSON.stringify(cells)
     };
-    fetch('/api/save/'+currentPlayer, options)
+
+    fetch('/api/save/'+type, options)
         .then(response => {
             if (!response.ok) throw new Error(response.status);
         })
@@ -120,8 +122,9 @@ function renderHTMLFromJSON(jsonData) {
     // Loop through the JSON data and build the HTML
     let game=1;
     jsonData.forEach((row) => {
+        let message = row.type == 'draw'?'Its was a draw!':row.player+' Won!';
         output += `<div class="card">
-              <a href="/board/${row._id}">Game(${game++}) ${row.player} Won!</a>
+              <a href="/board/${row._id}">Game(${game++}) ${message}</a>
            </div>`;
     });
 

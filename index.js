@@ -18,7 +18,8 @@ app.use(session({
 
 var Data = new Schema({
     data: Array,
-    player: String
+    player: String,
+    type: String
 });
 
 var Board = mongoose.model('Board', Data);
@@ -32,10 +33,16 @@ var User = mongoose.model('User', userSchema);
 
 // REST API to save game data to MongoDB
 app.post('/api/save/:player', express.json(), function(req, res) {
-    const player = req.params.player;
+    let player = req.params.player;
+    let type="win";
+    if (player=='draw') {
+        type='draw';
+        player='';
+    }
     new Board({
         data:  req.body,
-        player: player
+        player: player,
+        type: type
     }).save();
 });
 
@@ -55,8 +62,10 @@ app.get('/api/games', express.json(), function(req, res) {
         });
 });
 
+//set environment
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 let board;
@@ -72,7 +81,7 @@ app.get('/board/:id',async (req, res) => {
     const loadboard = await Board.findOne({_id:boardid}).exec();
     console.log(loadboard)
     boarddata=JSON.parse(JSON.stringify(loadboard.data));
-    newmessage = loadboard.player+' WON!';
+    newmessage = loadboard.type=='draw'?"It was a draw!":loadboard.player+' WON!';
     res.render('index', { board: boarddata,player: newmessage });
 });
 
@@ -87,7 +96,7 @@ app.post('/delete',requireAuth, async (req, res) => {
     const ids = req.body['ids[]'];;
     try {
         await Board.deleteMany({ _id: { $in: ids } });
-        res.redirect('/');
+        res.redirect('/admin');
     } catch (err) {
         console.error(err);
         res.sendStatus(500);

@@ -12,7 +12,7 @@
         <% var index=1%>
         <% boards.forEach(board => { %>
             <li>
-                (<%=index++%>) <%= board.player %> Won!
+                (<%=index++%>) <%= board.type=='draw'?'It was a draw!':board.player+' Won!'%>
                  <input type="checkbox" name="ids[]" value="<%= board._id %>">
             </li>
         <% }) %>
