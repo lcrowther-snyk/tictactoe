@@ -1,35 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-var mongoose = require('mongoose');
 const session = require('express-session');
-var Schema   = mongoose.Schema;
+const db = require("./db");
 
-const url = 'mongodb://localhost:27017';
-const dbName = 'tic-tac-toe';
-mongoose.connect(url+"/"+dbName);
-
-// Set up session middleware
+// Set up middleware
 app.use(session({
-    secret: 'my-secret-key',
+    secret: Math.random()+'key',
     resave: false,
     saveUninitialized: true
 }));
-
-var Data = new Schema({
-    data: Array,
-    player: String,
-    type: String
-});
-
-var Board = mongoose.model('Board', Data);
-
-const userSchema = new Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
-
-var User = mongoose.model('User', userSchema);
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // REST API to save game data to MongoDB
 app.post('/api/save/:player', express.json(), function(req, res) {
@@ -39,16 +23,15 @@ app.post('/api/save/:player', express.json(), function(req, res) {
         type='draw';
         player='';
     }
-    new Board({
+    new db.Board({
         data:  req.body,
         player: player,
         type: type
     }).save();
 });
 
-// REST API to save game data to MongoDB
 app.get('/api/games', express.json(), function(req, res) {
-    Board.find()
+    db.Board.find()
         .then((boards) => {
             if(boards){
                 console.log(boards);
@@ -62,23 +45,13 @@ app.get('/api/games', express.json(), function(req, res) {
         });
 });
 
-//set environment
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-let board;
-let player;
-
 app.get('/', (req, res) => {
-    board = [];
-    player = 'X\'s turn';
-    res.render('index', { board: board,player: player });
+    res.render('index', { board: [],player: 'X\'s turn' });
 });
+
 app.get('/board/:id',async (req, res) => {
     const boardid = req.params.id;
-    const loadboard = await Board.findOne({_id:boardid}).exec();
+    const loadboard = await db.Board.findOne({_id:boardid}).exec();
     console.log(loadboard)
     boarddata=JSON.parse(JSON.stringify(loadboard.data));
     newmessage = loadboard.type=='draw'?"It was a draw!":loadboard.player+' WON!';
@@ -87,7 +60,7 @@ app.get('/board/:id',async (req, res) => {
 
 app.get('/admin',requireAuth, async (req, res) => {
     // query the database to get all collections
-    const boards = await Board.find();
+    const boards = await db.Board.find();
     // render the collections in the EJS template
     res.render('admin', { boards });
 });
@@ -95,7 +68,7 @@ app.get('/admin',requireAuth, async (req, res) => {
 app.post('/delete',requireAuth, async (req, res) => {
     const ids = req.body['ids[]'];;
     try {
-        await Board.deleteMany({ _id: { $in: ids } });
+        await db.Board.deleteMany({ _id: { $in: ids } });
         res.redirect('/admin');
     } catch (err) {
         console.error(err);
@@ -112,10 +85,7 @@ app.get('/logout', function(req, res, next) {
 });
 
 app.post('/login',async function(req, res, next) {
-    var username =  req.body.username;
-    var password =  req.body.password;
-    users = await User.find({ username: username, password: password  });
-    if (users.length > 0) {
+    if(await db.login(req.body.username,req.body.password)) {
         req.session.authenticated  = true;
         return res.redirect("/admin")
     }
@@ -124,22 +94,6 @@ app.post('/login',async function(req, res, next) {
     }
 });
 
-// Check if the first user exists
-checkAdmin();
-
-app.listen(3000, () => console.log('Server started on port 3000'));
-
-async function checkAdmin() {
-    var adminUser = await User.findOne({username: 'admin'});
-    if (!adminUser) {
-        const newUser = new User({
-            username: 'admin',
-            password: 'snyk2023'
-        });
-        newUser.save();
-    }
-
-}
 function requireAuth(req, res, next) {
     if (req.session.authenticated) {
         next();
@@ -147,4 +101,6 @@ function requireAuth(req, res, next) {
         res.redirect('/login');
     }
 }
+
+app.listen(3000, () => console.log('Server started on port 3000'));
 
