@@ -2,14 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 var mongoose = require('mongoose');
+const session = require('express-session');
 var Schema   = mongoose.Schema;
-
-authenticated = false;
 
 const url = 'mongodb://localhost:27017';
 const dbName = 'tic-tac-toe';
 mongoose.connect(url+"/"+dbName);
 
+// Set up session middleware
+app.use(session({
+    secret: 'my-secret-key',
+    resave: false,
+    saveUninitialized: true
+}));
 
 var Data = new Schema({
     data: Array,
@@ -71,14 +76,14 @@ app.get('/board/:id',async (req, res) => {
     res.render('index', { board: boarddata,player: newmessage });
 });
 
-app.get('/admin',isAuthenticated, async (req, res) => {
+app.get('/admin',requireAuth, async (req, res) => {
     // query the database to get all collections
     const boards = await Board.find();
     // render the collections in the EJS template
     res.render('admin', { boards });
 });
 
-app.post('/delete',isAuthenticated, async (req, res) => {
+app.post('/delete',requireAuth, async (req, res) => {
     const ids = req.body['ids[]'];;
     try {
         await Board.deleteMany({ _id: { $in: ids } });
@@ -93,31 +98,22 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 app.get('/logout', function(req, res, next) {
-    authenticated = false;
+    req.session.destroy();
     res.redirect('/');
 });
-// app.post('/login',
-//     passport.authenticate('local', { successRedirect: '/admin', failureRedirect: '/login' })
-// );
+
 app.post('/login',async function(req, res, next) {
     var username =  req.body.username;
     var password =  req.body.password;
     users = await User.find({ username: username, password: password  });
     if (users.length > 0) {
-        authenticated = true;
+        req.session.authenticated  = true;
         return res.redirect("/admin")
     }
     else {
         return res.redirect("/login")
     }
 });
-
-function isAuthenticated(req, res, next) {
-    if (authenticated) {
-        return next();
-    }
-    res.redirect('/login');
-}
 
 // Check if the first user exists
 checkAdmin();
@@ -135,3 +131,11 @@ async function checkAdmin() {
     }
 
 }
+function requireAuth(req, res, next) {
+    if (req.session.authenticated) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
+
