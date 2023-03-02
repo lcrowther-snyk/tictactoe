@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const session = require('express-session');
 const db = require("./db");
+var st = require('st');
+
 
 // Set up middleware
 app.use(session({
@@ -12,6 +14,7 @@ app.use(session({
 }));
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(st({ path: './public', url: '/public' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
