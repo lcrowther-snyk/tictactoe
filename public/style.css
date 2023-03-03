@@ -1,7 +1,9 @@
 #board {
     display: flex;
     flex-wrap: wrap;
-    width: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .cell {
@@ -29,6 +31,8 @@
     background-color: #f1f1f1;
     padding: 10px;
     margin-bottom: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
 h2 {

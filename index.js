@@ -42,7 +42,6 @@ app.get('/', async (req, res) => {
 app.get('/board/:id',async (req, res) => {
     const boardid = req.params.id;
     const loadboard = await db.Board.findOne({_id:boardid}).exec();
-    console.log(loadboard)
     boarddata=JSON.parse(JSON.stringify(loadboard.data));
     newmessage =loadboard.type=='draw'?"It was a draw!":loadboard.player+' Won!';
     const boards = await db.Board.find(); //load previous games

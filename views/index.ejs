@@ -9,33 +9,34 @@
     <script>
         var loadboard = "<%= board %>";
     </script>
-    <div><h1>Tic Tac Toe!</h1><a href="/">New Game</a><br/><a href="/admin">Admin</a><br/><a href="/public/rules.html">Rules</a></div>
-    <div id="board"></div>
-    <div id="message" class="message"><%= player %></div>
-    <br/>
-    <form onsubmit="saveGameData()" accept-charset="utf-8">
-        <div>
-            <input type="text" id="gamename" disabled>
-        </div>
-        <div>
-            <button type="submit" id="savegame" disabled>Save Game</button>
-        </div>
-    </form>
-    <br/>
-    <div><h3>Previous Games</h3></div>
-    <div id="boards" class="boards"></div>
-    <script src="/app.js"></script>
-    <script>
-        createBoard();
-    </script>
-    <%
-        boards.forEach(function(board) {
-            let message = board.type == 'draw'?'Its was a draw!':board.player+' Won!'; %>
-            <div class="card" data-id="<%=board._id%>">
-                <a><%- marked(board.name.toString()) %></a>
-                <a href="/board/<%=board._id%>"> <%=message%></a>
+    <div style="text-align: center;">
+        <div><h1>Tic Tac Toe!</h1><a href="/">New Game</a><br/><a href="/admin">Admin</a><br/><a href="/public/rules.html">Rules</a></div>
+        <div id="board"></div>
+        <div id="message" class="message"><%= player %></div>
+        <br/>
+        <form onsubmit="saveGameData()" accept-charset="utf-8">
+            <div>
+                <input type="text" id="gamename" disabled>
             </div>
-       <% }); %>
-
+            <div>
+                <button type="submit" id="savegame" disabled>Save Game</button>
+            </div>
+        </form>
+        <br/>
+        <div><h3>Previous Games</h3></div>
+        <div id="boards" class="boards"></div>
+        <script src="/app.js"></script>
+        <script>
+            createBoard();
+        </script>
+        <%
+            boards.forEach(function(board) {
+                let message = board.type == 'draw'?'Its was a draw!':board.player+' Won!'; %>
+                <div class="card" data-id="<%=board._id%>">
+                    <a><%- marked(board.name.toString()) %></a>
+                    <a href="/board/<%=board._id%>"> <%=message%></a>
+                </div>
+           <% }); %>
+    </div>
 </body>
 </html>
