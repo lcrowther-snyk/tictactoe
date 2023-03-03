@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const session = require('express-session');
 const db = require("./db");
+var marked = require('marked');
 var st = require('st');
 
 
@@ -17,36 +18,25 @@ app.use(express.static('public'));
 app.use(st({ path: './public', url: '/public' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+marked.setOptions({ sanitize: true });
+app.locals.marked = marked;
 
 // REST API to save game data to MongoDB
-app.post('/api/save/:player/:type/:gamename', express.json(), function(req, res) {
-    let player = req.params.player;
-    let type=req.params.type;
-    let name=req.params.gamename;
+app.post('/api/save', express.json(), function(req, res) {
+    let player = req.body.player;
+    let type=req.body.type;
+    let name=req.body.name;
     new db.Board({
-        data:  req.body,
+        data:  req.body.data,
         player: player,
         type: type,
         name: name
     }).save();
 });
 
-app.get('/api/games', express.json(), function(req, res) {
-    db.Board.find()
-        .then((boards) => {
-            if(boards){
-                res.json(boards);
-            }
-        })
-        .catch((err) => {
-            //When there are errors We handle them here
-            console.log(err);
-            res.send(400, "Bad Request");
-        });
-});
-
-app.get('/', (req, res) => {
-    res.render('index', { board: [],player: 'X\'s turn' });
+app.get('/', async (req, res) => {
+    const boards = await db.Board.find(); //load previous games
+    res.render('index', {board: [], player: 'X\'s turn',boards:boards});
 });
 
 app.get('/board/:id',async (req, res) => {
@@ -55,7 +45,8 @@ app.get('/board/:id',async (req, res) => {
     console.log(loadboard)
     boarddata=JSON.parse(JSON.stringify(loadboard.data));
     newmessage =loadboard.type=='draw'?"It was a draw!":loadboard.player+' Won!';
-    res.render('index', { board: boarddata,player: loadboard.name+' ' +newmessage });
+    const boards = await db.Board.find(); //load previous games
+    res.render('index', { board: boarddata,player: loadboard.name+' ' +newmessage,boards: boards });
 });
 
 app.get('/admin',requireAuth, async (req, res) => {

@@ -6,12 +6,14 @@
     <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <body>
-    <script>var loadboard = "<%= board %>";</script>
+    <script>
+        var loadboard = "<%= board %>";
+    </script>
     <div><h1>Tic Tac Toe!</h1><a href="/">New Game</a><br/><a href="/admin">Admin</a><br/><a href="/public/rules.html">Rules</a></div>
     <div id="board"></div>
     <div id="message" class="message"><%= player %></div>
     <br/>
-    <form onsubmit="saveGameData()">
+    <form onsubmit="saveGameData()" accept-charset="utf-8">
         <div>
             <input type="text" id="gamename" disabled>
         </div>
@@ -25,8 +27,15 @@
     <script src="/app.js"></script>
     <script>
         createBoard();
-        showPrevious();
     </script>
-    </script>
+    <%
+        boards.forEach(function(board) {
+            let message = board.type == 'draw'?'Its was a draw!':board.player+' Won!'; %>
+            <div class="card" data-id="<%=board._id%>">
+                <a><%- marked(board.name.toString()) %></a>
+                <a href="/board/<%=board._id%>"> <%=message%></a>
+            </div>
+       <% }); %>
+
 </body>
 </html>

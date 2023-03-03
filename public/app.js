@@ -38,11 +38,6 @@ function createBoard() {
     }
 }
 
-async function showPrevious() {
-    await getGameData();
-}
-
-
 
 function play(cell, index) {
     if (cell.textContent === "" && !gameOver) {
@@ -93,41 +88,27 @@ function checkWin(player) {
 }
 // Save game data to MongoDB
 function saveGameData() {
+    const responseObj = {
+        data: cells,
+        name: gamename.value,
+        player: currentPlayer,
+        type: type
+    };
     const options = {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept-Charset': 'UTF-8'
         },
-        body: JSON.stringify(cells)
+        body: JSON.stringify(responseObj)
     };
-    fetch('/api/save/'+currentPlayer+'/'+type+'/'+gamename.value, options)
+
+    fetch('/api/save', options)
         .then(response => {
             if (!response.ok) throw new Error(response.status);
         })
         .catch(error => console.log(error));
 }
 
-async function getGameData() {
-    const options = {
-        method: 'GET'
-    };
-    const response = await fetch('/api/games',options);
-    const json = await response.json();
-    await renderHTMLFromJSON(json);
-}
 
-function renderHTMLFromJSON(jsonData) {
-
-    let output = '';
-    // Loop through the JSON data and build the HTML
-    jsonData.forEach((row) => {
-        let message = row.type == 'draw'?'Its was a draw!':row.player+' Won!';
-        output += `<div class="card" data-id="${row._id}">
-              <a href="/board/${row._id}">${row.name} ${message}</a>
-           </div>`;
-    });
-
-    // Render the HTML in the document body
-    document.getElementById("boards").innerHTML = output;
-}
 
