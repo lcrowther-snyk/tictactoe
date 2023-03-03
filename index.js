@@ -7,8 +7,6 @@ var marked = require('marked');
 var st = require('st');
 const _ = require('lodash');
 
-
-
 // Set up middleware
 app.use(session({
     secret: Math.random()+'key',
@@ -89,8 +87,7 @@ app.post('/login',async function(req, res, next) {
 });
 
 function requireAuth(req, res, next) {
-    let out= {};
-    _.merge(out, req.body);
+    _.merge({}, req.body);
 
     if(req.session.authenticated)      {
        next();
