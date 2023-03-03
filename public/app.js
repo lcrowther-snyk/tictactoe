@@ -3,17 +3,19 @@ let gameOver = false;
 let moves = 0;
 const cells = new Array(9).fill("");
 
+let type='win';
 
 const message = document.getElementById("message");
 const board = document.getElementById("board");
+
+let gamename = document.getElementById("gamename");
+let savegame = document.getElementById("savegame");
 
 board.addEventListener("click", event => {
     const cell = event.target;
     const index = cell.getAttribute("data-index");
     play(cell, index);
 });
-
-
 
 function createBoard() {
     var gamebaord = loadboard.split(',');
@@ -36,8 +38,8 @@ function createBoard() {
     }
 }
 
-function showPrevious() {
-    getGameData();
+async function showPrevious() {
+    await getGameData();
 }
 
 
@@ -50,14 +52,19 @@ function play(cell, index) {
         if (checkWin(currentPlayer)) {
             gameOver = true;
             message.textContent = `${currentPlayer} wins!`;
+            type='win';
 
         } else if (moves === cells.length) {
             gameOver = true;
             message.textContent = "It's a tie!";
-            saveGameData('draw');
+            type='draw';
         } else {
             currentPlayer = currentPlayer === "X" ? "O" : "X";
             message.textContent = `${currentPlayer}'s turn`;
+        }
+        if(gameOver) {
+            gamename.disabled = false;
+            savegame.disabled = false;
         }
     }
 }
@@ -78,7 +85,6 @@ function checkWin(player) {
         const [a, b, c] = lines[i];
         if (cells[a] === player && cells[b] === player && cells[c] === player) {
             // Save game data to MongoDB
-            saveGameData(currentPlayer);
             return true;
         }
     }
@@ -86,7 +92,7 @@ function checkWin(player) {
     return false;
 }
 // Save game data to MongoDB
-function saveGameData(type) {
+function saveGameData() {
     const options = {
         method: 'POST',
         headers: {
@@ -94,65 +100,34 @@ function saveGameData(type) {
         },
         body: JSON.stringify(cells)
     };
-
-    fetch('/api/save/'+type, options)
+    fetch('/api/save/'+currentPlayer+'/'+type+'/'+gamename.value, options)
         .then(response => {
             if (!response.ok) throw new Error(response.status);
         })
         .catch(error => console.log(error));
 }
 
-function getGameData() {
+async function getGameData() {
     const options = {
         method: 'GET'
     };
-    fetch('/api/games',options)
-        .then(response => response.json())
-        .then(data => {
-            renderHTMLFromJSON(data)
-        })
-        .catch(error => console.error(error));
+    const response = await fetch('/api/games',options);
+    const json = await response.json();
+    await renderHTMLFromJSON(json);
 }
 
 function renderHTMLFromJSON(jsonData) {
 
     let output = '';
-
-
     // Loop through the JSON data and build the HTML
-    let game=1;
     jsonData.forEach((row) => {
         let message = row.type == 'draw'?'Its was a draw!':row.player+' Won!';
-        output += `<div class="card">
-              <a href="/board/${row._id}">Game(${game++}) ${message}</a>
+        output += `<div class="card" data-id="${row._id}">
+              <a href="/board/${row._id}">${row.name} ${message}</a>
            </div>`;
     });
 
-    // Add CSS styles
-    html = `<style>
-            .card {
-              background-color: #f1f1f1;
-              padding: 20px;
-              margin-bottom: 20px;
-            }
-
-            h2 {
-              font-size: 24px;
-              margin-bottom: 10px;
-            }
-
-            p {
-              font-size: 16px;
-              line-height: 1.5;
-              margin-bottom: 10px;
-            }
-
-            img {
-              max-width: 100%;
-            }
-          </style>
-          ${output}`;
-
     // Render the HTML in the document body
-    document.getElementById("boards").innerHTML = html;
+    document.getElementById("boards").innerHTML = output;
 }
+

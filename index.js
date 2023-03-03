@@ -19,17 +19,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // REST API to save game data to MongoDB
-app.post('/api/save/:player', express.json(), function(req, res) {
+app.post('/api/save/:player/:type/:gamename', express.json(), function(req, res) {
     let player = req.params.player;
-    let type="win";
-    if (player=='draw') {
-        type='draw';
-        player='';
-    }
+    let type=req.params.type;
+    let name=req.params.gamename;
     new db.Board({
         data:  req.body,
         player: player,
-        type: type
+        type: type,
+        name: name
     }).save();
 });
 
@@ -37,7 +35,6 @@ app.get('/api/games', express.json(), function(req, res) {
     db.Board.find()
         .then((boards) => {
             if(boards){
-                console.log(boards);
                 res.json(boards);
             }
         })
@@ -57,8 +54,8 @@ app.get('/board/:id',async (req, res) => {
     const loadboard = await db.Board.findOne({_id:boardid}).exec();
     console.log(loadboard)
     boarddata=JSON.parse(JSON.stringify(loadboard.data));
-    newmessage = loadboard.type=='draw'?"It was a draw!":loadboard.player+' WON!';
-    res.render('index', { board: boarddata,player: newmessage });
+    newmessage =loadboard.type=='draw'?"It was a draw!":loadboard.player+' Won!';
+    res.render('index', { board: boarddata,player: loadboard.name+' ' +newmessage });
 });
 
 app.get('/admin',requireAuth, async (req, res) => {

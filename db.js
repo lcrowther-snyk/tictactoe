@@ -9,7 +9,8 @@ mongoose.connect(url+"/"+dbName);
 let Data = new Schema({
     data: Array,
     player: String,
-    type: String
+    type: String,
+    name: String
 });
 
 const Board = mongoose.model('Board', Data)
