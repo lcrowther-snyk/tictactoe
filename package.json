@@ -24,7 +24,7 @@
     "express-session": "^1.17.3",
     "mongoose": "^7.0.0",
     "marked": "0.3.5",
-    "lodash": "4.17.4",
+    "lodash": "4.17.21",
     "st": "0.2.4"
   }
 }
