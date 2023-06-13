@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require ('bcrypt');
+require('dotenv').config()
+
 
 var Schema   = mongoose.Schema;
 
@@ -29,9 +31,9 @@ checkAdmin();
 
 async function checkAdmin() {
     var adminUser = await User.findOne({username: 'admin'});
-
     if (!adminUser) {
-        bcrypt.hash("snyk2023", 10, function(err, hash) {
+        let password = "snyk2023";
+        bcrypt.hash(password, 10, function(err, hash) {
             const newUser = new User({
                 username: 'admin',
                 password: hash
