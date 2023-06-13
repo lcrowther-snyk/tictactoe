@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require ('bcrypt');
 
 var Schema   = mongoose.Schema;
 
@@ -28,20 +29,25 @@ checkAdmin();
 
 async function checkAdmin() {
     var adminUser = await User.findOne({username: 'admin'});
-    if (!adminUser) {
-        const newUser = new User({
-            username: 'admin',
-            password: 'snyk2023'
-        });
-        newUser.save();
-    }
 
+    if (!adminUser) {
+        bcrypt.hash("snyk2023", 10, function(err, hash) {
+            const newUser = new User({
+                username: 'admin',
+                password: hash
+            });
+            newUser.save();
+        });
+    }
 }
 
+
 async function login(username, password) {
-    let users = await User.find({username: username, password: password});
+    let users = await User.find({username: username});
     if (users.length > 0) {
-        return true;
+        user = users[0];
+        if(bcrypt.compareSync(password,user.password))
+            return true;
     } else {
         return false;
     }
