@@ -75,8 +75,8 @@ app.get('/logout', function(req, res, next) {
 });
 
 app.post('/login',async function(req, res, next) {
-    let username = encodeURIComponent(req.body.username);
-    let password = encodeURIComponent(req.body.password);
+    let username = req.body.username;
+    let password = req.body.password;
     if(await db.login(username,password)) {
         req.session.authenticated  = true;
         return res.redirect("/admin")
