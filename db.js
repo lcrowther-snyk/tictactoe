@@ -46,12 +46,12 @@ async function checkAdmin() {
 
 
 async function login(username, password) {
-    let users = await User.find({username: username, password: password});
-    if (users.length > 0) {
+    let user = await User.findOne({username: username, password: password});
+    if (user) {
         //found with encrypted password
         return true;
     }
-    let user = await User.findOne({username: username});
+    user = await User.findOne({username: username});
     if (user) {
         let verified = bcrypt.compareSync(password, user.password);
         if (verified) return true;
