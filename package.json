@@ -18,16 +18,18 @@
   },
   "homepage": "https://github.com/lcrowther-snyk/tictactoe#readme",
   "dependencies": {
+    "bcrypt": "4.0.1",
     "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "csurf": "1.11.0",
+    "dotenv": "16.1.4",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "mongoose": "^7.0.0",
-    "marked": "0.3.5",
-    "lodash": "4.17.4",
-    "st": "1.2.2",
-    "bcrypt": "4.0.1",
     "got": "6.7.1",
-    "dotenv": "16.1.4"
+    "lodash": "4.17.4",
+    "marked": "0.3.5",
+    "mongoose": "^7.0.0",
+    "st": "1.2.2"
   }
 }

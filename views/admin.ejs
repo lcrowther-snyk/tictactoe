@@ -17,20 +17,10 @@
             </li>
         <% }) %>
     </ul>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <button type="submit">Delete Selected</button>
-    <input type="button" value="Delete All" onclick="checkAll()">
+    <input type="submit" name="deleteAll" value="Delete All">
 </form>
-<script>
-    // This is the JavaScript function that checks all the boxes
-    function checkAll() {
-        var checkboxes = document.querySelectorAll("input[name='ids[]']");
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = true;
-        }
 
-        // This submits the form
-        document.getElementById("adminForm").submit();
-    }
-</script>
 </body>
 </html>

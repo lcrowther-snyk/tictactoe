@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
-const bcrypt = require ('bcrypt');
+const bcrypt = require('bcrypt');
 require('dotenv').config()
 
 
-var Schema   = mongoose.Schema;
+var Schema = mongoose.Schema;
 
 const url = 'mongodb://127.0.0.1:27017';
 const dbName = 'tic-tac-toe';
-mongoose.connect(url+"/"+dbName);
+mongoose.connect(url + "/" + dbName);
 
 let Data = new Schema({
     data: Array,
@@ -19,8 +19,8 @@ let Data = new Schema({
 const Board = mongoose.model('Board', Data)
 
 const userSchema = new Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
+    username: {type: String, required: true, unique: true},
+    password: {type: String, required: true}
 });
 
 const User = mongoose.model('User', userSchema);
@@ -31,29 +31,27 @@ checkAdmin();
 
 async function checkAdmin() {
     var adminUser = await User.findOne({username: 'admin'});
-    if (!adminUser) {
-        let password = "snyk2023";
-        bcrypt.hash(password, 10, function(err, hash) {
-            const newUser = new User({
-                username: 'admin',
-                password: hash
-            });
-            newUser.save();
-        });
+    if (adminUser) {
+        //clean up old admin user
+        adminUser.deleteOne();
     }
+    const newUser = new User({
+        username: 'admin',
+        password: "snyk2023"
+    });
+    newUser.save();
+
 }
 
 
 async function login(username, password) {
-    let users = await User.find({username: username});
+    let users = await User.find({username: username, password: password});
     if (users.length > 0) {
-        user = users[0];
-        if(bcrypt.compareSync(password,user.password))
-            return true;
+        return true;
     } else {
         return false;
     }
 }
 
 
-module.exports = {Board,User,login}
+module.exports = {Board, User, login}

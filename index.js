@@ -6,6 +6,11 @@ const db = require("./db");
 var marked = require('marked');
 var st = require('st');
 const _ = require('lodash');
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
+// setup route middlewares
+//const csrfProtection = csrf({ cookie: true });
 
 // Set up middleware
 app.use(session({
@@ -18,8 +23,10 @@ app.use(express.static('public'));
 app.use(st({ path: './public', url: '/public' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 marked.setOptions({ sanitize: true });
 app.locals.marked = marked;
+
 
 // REST API to save game data to MongoDB
 app.post('/api/save', express.json(), function(req, res) {
@@ -52,14 +59,20 @@ app.get('/admin',requireAuth, async (req, res) => {
     // query the database to get all collections
     const boards = await db.Board.find();
     // render the collections in the EJS template
-    res.render('admin', { boards });
+    res.render('admin', { boards , csrfToken: ""/*req.csrfToken()*/ });
 });
 
 app.post('/delete',requireAuth, async (req, res) => {
+    const deleteAll = req.body['deleteAll'];;
     const ids = req.body['ids[]'];;
     try {
-        await db.Board.deleteMany({ _id: { $in: ids } });
-        res.redirect('/admin');
+        if(deleteAll) {
+            await db.Board.find().deleteMany();
+        }
+        else {
+            await db.Board.deleteMany({ _id: { $in: ids } });
+        }
+        res.redirect('/admin',);
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
