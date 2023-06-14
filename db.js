@@ -35,9 +35,10 @@ async function checkAdmin() {
         //clean up old admin user
         adminUser.deleteOne();
     }
+
     const newUser = new User({
         username: 'admin',
-        password: "snyk2023"
+        password: bcrypt.hashSync( "snyk2023", 10)
     });
     newUser.save();
 
@@ -47,10 +48,15 @@ async function checkAdmin() {
 async function login(username, password) {
     let users = await User.find({username: username, password: password});
     if (users.length > 0) {
+        //found with encrypted password
         return true;
-    } else {
-        return false;
     }
+    let user = await User.findOne({username: username});
+    if (user) {
+        let verified = bcrypt.compareSync(password, user.password);
+        if (verified) return true;
+    }
+    return false;
 }
 
 
