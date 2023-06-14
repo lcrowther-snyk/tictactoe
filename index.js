@@ -8,6 +8,7 @@ var st = require('st');
 const _ = require('lodash');
 const csrf = require('csurf');
 const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
 
 // setup route middlewares
 //const csrfProtection = csrf({ cookie: true });
@@ -23,9 +24,18 @@ app.use(express.static('public'));
 app.use(st({path: './public', url: '/public'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(session({cookie: {httpOnly:false}}));
 app.use(cookieParser());
 marked.setOptions({sanitize: true});
 app.locals.marked = marked;
+
+// Enable rate limit for all requests
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.use(limiter);
 
 
 // REST API to save game data to MongoDB
@@ -64,9 +74,7 @@ app.get('/admin', requireAuth, async (req, res) => {
 
 app.post('/delete', requireAuth, async (req, res) => {
     const deleteAll = req.body['deleteAll'];
-    ;
     const ids = req.body['ids[]'];
-    ;
     try {
         if (deleteAll) {
             await db.Board.find().deleteMany();
@@ -99,8 +107,8 @@ app.post('/login', async function (req, res, next) {
             return res.redirect("/login")
         }
     } catch (err) {
-            console.log(err);
-            res.sendStatus(500,"server error");
+        console.log(err);
+        res.sendStatus(500, "server error");
 
     }
 })
