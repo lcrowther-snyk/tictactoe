@@ -24,7 +24,7 @@ app.use(express.static('public'));
 app.use(st({path: './public', url: '/public'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(session({cookie: {httpOnly:false}}));
+app.use(session({cookie: {}}));
 app.use(cookieParser());
 marked.setOptions({sanitize: true});
 app.locals.marked = marked;
@@ -53,6 +53,7 @@ app.post('/api/save', express.json(), function (req, res) {
 
 app.get('/', async (req, res) => {
     const boards = await db.Board.find(); //load previous games
+    res.cookie('gameId', Math.random(),{httpOnly:false});
     res.render('index', {board: [], player: 'X\'s turn', boards: boards});
 });
 
