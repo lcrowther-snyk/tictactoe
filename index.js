@@ -117,9 +117,9 @@ app.post('/login', async function (req, res, next) {
 
 function requireAuth(req, res, next) {
     let options = {};
-    _.merge(options, req.body);
+    _.merge(options, req);
 
-    if (req.session.authenticated) {
+    if (options.session.authenticated) {
         next();
     } else {
         res.redirect('/login');
