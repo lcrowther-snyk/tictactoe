@@ -28,7 +28,7 @@
     "express-rate-limit": "^6.7.0",
     "express-session": "^1.17.3",
     "got": "6.7.1",
-    "lodash": "4.17.4",
+    "lodash": "4.17.17",
     "marked": "0.3.5",
     "mongoose": "^7.0.0",
     "st": "0.2.4"
