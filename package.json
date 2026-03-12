@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/lcrowther-snyk/tictactoe#readme",
   "dependencies": {
-    "bcrypt": "4.0.1",
+    "bcrypt": "5.0.1",
     "body-parser": "^1.20.2",
     "cookie-parser": "1.4.6",
     "csurf": "1.11.0",
